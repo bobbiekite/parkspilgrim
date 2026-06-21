@@ -12,7 +12,7 @@
   :root{
     --slate:#1C2B3A;
     --parchment:#F5F0E8;
-    --sage:#7A9E7E;
+    --sage:#4F7155;
     --gold:#C9A84C;
     --offwhite:#FAFAF7;
     --slate-soft:rgba(28,43,58,.72);
@@ -56,7 +56,15 @@
   header.site{
     position:absolute;top:0;left:0;right:0;z-index:10;
   }
+  /* Legibility scrim so the nav stays readable over the bright sky */
+  header.site::before{
+    content:"";
+    position:absolute;top:0;left:0;right:0;height:9rem;
+    background:linear-gradient(180deg,rgba(13,21,31,.78) 0%,rgba(13,21,31,.42) 45%,rgba(13,21,31,0) 100%);
+    pointer-events:none;z-index:-1;
+  }
   .nav{
+    position:relative;
     display:flex;align-items:center;justify-content:space-between;
     padding:1.5rem 1.6rem;max-width:74rem;margin:0 auto;
   }
@@ -71,7 +79,7 @@
   }
   .nav-links{display:flex;gap:2rem;align-items:center;}
   .nav-links a{
-    color:rgba(250,250,247,.86);
+    color:var(--offwhite);
     text-decoration:none;
     font-size:.86rem;
     font-weight:500;
@@ -79,7 +87,37 @@
     transition:color .2s ease;
   }
   .nav-links a:hover{color:var(--gold);}
-  @media(max-width:640px){.nav-links{display:none;}}
+
+  /* Mobile menu toggle (hidden on desktop) */
+  .nav-toggle{
+    display:none;
+    background:none;border:0;cursor:pointer;
+    width:2.75rem;height:2.75rem;padding:.5rem;
+    color:var(--offwhite);
+  }
+  .nav-toggle svg{width:100%;height:100%;display:block;}
+
+  @media(max-width:640px){
+    .nav-toggle{display:inline-flex;align-items:center;justify-content:center;}
+    .nav-links{
+      display:none;
+      position:absolute;top:calc(100% + .4rem);right:1.6rem;left:1.6rem;
+      flex-direction:column;gap:0;align-items:stretch;
+      background:rgba(17,26,37,.97);
+      -webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);
+      border:1px solid rgba(250,250,247,.14);
+      border-radius:8px;
+      padding:.4rem;
+      box-shadow:0 22px 55px rgba(8,14,22,.5);
+    }
+    .nav-links.open{display:flex;}
+    .nav-links a{
+      padding:.9rem 1rem;border-radius:5px;font-size:1rem;
+    }
+    .nav-links a:hover,.nav-links a:focus-visible{
+      background:rgba(250,250,247,.08);color:var(--gold);
+    }
+  }
 
   /* ---------- Hero ---------- */
   .hero{
@@ -106,6 +144,21 @@
     position:relative;z-index:2;
     max-width:74rem;margin:0 auto;width:100%;
     padding:0 1.6rem 6rem;
+  }
+  /* Solid-ish dark panel: gives the hero text a reliable, 508-safe backdrop
+     instead of depending on whatever the photo is doing behind it. */
+  .hero-card{
+    display:inline-block;
+    max-width:44rem;
+    background:rgba(17,26,37,.96);
+    -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);
+    border-top:2px solid var(--gold);
+    border-radius:5px;
+    padding:2.4rem 2.7rem 2.7rem;
+    box-shadow:0 26px 70px rgba(8,14,22,.46);
+  }
+  @media(max-width:560px){
+    .hero-card{padding:1.8rem 1.6rem 2rem;}
   }
   .hero h1{
     font-family:var(--display);
@@ -195,11 +248,12 @@
     transition:background .3s ease;
   }
   .path:hover{background:#22344799;}
-  .path .num{
-    font-family:var(--display);
-    font-size:1.05rem;font-style:italic;
-    color:var(--gold);
-    display:block;margin-bottom:.7rem;
+  .path-head{
+    margin-bottom:1.1rem;
+  }
+  .path-icon{
+    width:38px;height:38px;
+    color:var(--gold);display:block;
   }
   .path h3{
     font-family:var(--display);
@@ -327,7 +381,7 @@
   footer.site .brand-sm{font-family:var(--display);font-size:1.15rem;color:rgba(250,250,247,.8);}
 
   /* ---------- Motion / a11y ---------- */
-  a:focus-visible,.hero-cta:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px;}
+  a:focus-visible,.hero-cta:focus-visible,.nav-toggle:focus-visible{outline:2px solid var(--gold);outline-offset:3px;border-radius:2px;}
   @media(prefers-reduced-motion:reduce){
     *{animation:none!important;scroll-behavior:auto!important;}
     .hero-img{transform:none;}
@@ -344,7 +398,10 @@
 <header class="site">
   <nav class="nav">
     <a href="#top" class="brand">American Parks<br>Pilgrimage</a>
-    <div class="nav-links">
+    <button class="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+    </button>
+    <div class="nav-links" id="nav-links">
       <a href="#what">What It Is</a>
       <a href="#pathways">Pathways</a>
       <a href="#offerings">Upcoming</a>
@@ -359,12 +416,14 @@
   <div class="hero-img" role="img" aria-label="Chaco Canyon at dusk"></div>
   <div class="hero-veil"></div>
   <div class="hero-inner">
-    <h1>Secular meaning-making, <em>in our own backyard.</em></h1>
-    <p class="lede">A pilgrimage doesn't require a far-off shrine. It asks only that you arrive somewhere with intention, and let the place do its work.</p>
-    <a href="#what" class="hero-cta">
-      Begin here
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
-    </a>
+    <div class="hero-card">
+      <h1>Secular meaning-making, <em>in our own backyard.</em></h1>
+      <p class="lede">A pilgrimage is possible anywhere. It asks only that you arrive somewhere with intention, and let the place do its work.</p>
+      <a href="#what" class="hero-cta">
+        Begin here
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+      </a>
+    </div>
   </div>
 </section>
 
@@ -392,7 +451,7 @@
     <p class="lead">For thousands of years, people have set out toward meaningful places on purpose: to mark a passage, to grieve, to give thanks, to understand where they came from.</p>
     <p>Secular pilgrimage keeps the practice and sets aside the requirement of religion. You bring your own questions. The journey is structured but unhurried: a place chosen with care, time set apart, attention paid. What you make of it is yours.</p>
     <p>It works because the impulse was never really about the destination. It was about going <em>differently</em>: slowly, deliberately, and open to being changed by what you find.</p>
-    <p class="pull">You don't have to travel far. You have to travel with intention.</p>
+    <p class="pull">A pilgrimage can begin exactly where you are, as long as you travel with intention.</p>
   </div>
 </section>
 
@@ -411,28 +470,53 @@
     <div class="intro">
       <p class="eyebrow on-dark">Four pilgrimage pathways</p>
       <h2>Where a pilgrimage can take you</h2>
-      <p>There's no single right place. These four pathways are simply doorways. Pick the one that calls, or move between them over a lifetime.</p>
+      <p>The perfect destination is the one you choose. These four pathways are simply doorways. Pick the one that calls, or move between them over a lifetime.</p>
     </div>
     <div class="path-grid">
       <div class="path">
-        <span class="num">i.</span>
+        <div class="path-head">
+          <svg class="path-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
+            <path d="M24 7 L28 14.5 L25.5 14.5 L29.5 21 L27 21 L31 28 L28.5 28 L33 35 L25 35 L25 41 L23 41 L23 35 L15 35 L19.5 28 L17 28 L21 21 L18.5 21 L22.5 14.5 L20 14.5 Z"/>
+          </svg>
+        </div>
         <h3>National Park Service Sites</h3>
         <p>The full 433: not only the 63 marquee parks but the battlefields, seashores, monuments, and historic homes that hold the country's nature, heritage, and civic memory.</p>
       </div>
       <div class="path">
-        <span class="num">ii.</span>
+        <div class="path-head">
+          <svg class="path-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true" focusable="false">
+            <path d="M24 8 C16.8 8 11 13.8 11 21 C11 30 24 41 24 41 C24 41 37 30 37 21 C37 13.8 31.2 8 24 8 Z"/>
+            <circle cx="24" cy="20.5" r="4.2"/>
+          </svg>
+        </div>
         <h3>State, Regional &amp; Local Sites</h3>
         <p>Courthouses, county museums, state parks, the overlook ten minutes from home. The places you already pass, approached this time on purpose.</p>
       </div>
       <div class="path">
-        <span class="num">iii.</span>
+        <div class="path-head">
+          <svg class="path-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M24 21 L13.5 41.5"/>
+            <path d="M24 21 L34.5 41.5"/>
+            <path d="M24 21.5 L24.5 42.5"/>
+            <path d="M11.4 41.5 L15.4 40.9 M32.6 40.9 L36.6 41.5 M22.4 42.5 L26.4 42.5"/>
+            <path d="M18.2 33 L29.8 33"/>
+            <path d="M24 21 L24 17.4"/>
+            <rect x="18" y="14.6" width="12.4" height="3.4" rx="1.7" transform="rotate(-7 24 16.3)"/>
+            <circle cx="18.4" cy="15.8" r="0.7"/>
+            <path d="M30.2 17.1 l2 .5"/>
+          </svg>
+        </div>
         <h3>CCC &amp; New Deal Legacy Sites</h3>
         <p>Where land, history, and public service converge: the trails, lodges, and stonework built by a generation that believed the commons was worth shaping by hand.</p>
       </div>
       <div class="path">
-        <span class="num">iv.</span>
+        <div class="path-head">
+          <svg class="path-icon" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M 40.50,24.00 L 40.19,26.42 L 39.53,28.75 L 38.54,30.94 L 37.24,32.94 L 35.68,34.72 L 33.88,36.23 L 31.90,37.44 L 29.77,38.34 L 27.56,38.91 L 25.30,39.14 L 23.05,39.04 L 20.87,38.61 L 18.78,37.86 L 16.85,36.82 L 15.12,35.52 L 13.60,33.99 L 12.34,32.27 L 11.37,30.39 L 10.68,28.41 L 10.30,26.37 L 10.23,24.31 L 10.47,22.29 L 10.99,20.34 L 11.80,18.51 L 12.85,16.84 L 14.13,15.35 L 15.61,14.09 L 17.23,13.06 L 18.98,12.30 L 20.80,11.81 L 22.65,11.60 L 24.49,11.67 L 26.29,12.01 L 27.99,12.60 L 29.58,13.43 L 31.00,14.48 L 32.24,15.71 L 33.27,17.10 L 34.08,18.61 L 34.64,20.20 L 34.96,21.84 L 35.03,23.50 L 34.85,25.12 L 34.44,26.68 L 33.81,28.15 L 32.98,29.48 L 31.97,30.67 L 30.81,31.68 L 29.53,32.49 L 28.15,33.10 L 26.73,33.49 L 25.28,33.66 L 23.84,33.61 L 22.44,33.35 L 21.11,32.89 L 19.88,32.25 L 18.78,31.44 L 17.83,30.50 L 17.04,29.43 L 16.42,28.28 L 16.00,27.06 L 15.76,25.82 L 15.71,24.57 L 15.85,23.35 L 16.16,22.18 L 16.64,21.08 L 17.26,20.09 L 18.02,19.22 L 18.88,18.48 L 19.82,17.89 L 20.83,17.46 L 21.87,17.18 L 22.92,17.07 L 23.96,17.12 L 24.96,17.32 L 25.90,17.66 L 26.76,18.13 L 27.53,18.71 L 28.19,19.39 L 28.72,20.14 L 29.13,20.95 L 29.40,21.79 L 29.55,22.64 L 29.51,23.91 L 29.21,25.09 L 28.66,26.13 L 27.92,26.99 L 27.04,27.63 L 26.07,28.04 L 25.08,28.21 L 24.12,28.15 L 23.24,27.88 L 22.48,27.44 L 21.87,26.86 L 21.44,26.19 L 21.19,25.48 L 21.13,25.01 L 21.22,24.11 L 21.56,23.36 L 22.07,22.81"/>
+          </svg>
+        </div>
         <h3>Your Own Sacred Place</h3>
-        <p>Anywhere that already holds meaning for you: a river, a grave, a kitchen table. You don't have to go far. You just have to go differently.</p>
+        <p>Anywhere that already holds meaning for you: a river, a grave, a kitchen table. It can be steps from your door — what matters is going differently.</p>
       </div>
     </div>
   </div>
@@ -482,7 +566,7 @@
       <span class="webinar-tag">Free introductory webinar</span>
       <p class="webinar-dates">July 16</p>
       <p class="webinar-time">5:00 PM MST</p>
-      <p class="webinar-note">An easy first step, no cost and no commitment. Email <a href="mailto:info@parkspilgrim.org">info@parkspilgrim.org</a> to reserve a spot.</p>
+      <p class="webinar-note">An easy first step, free to join and yours to explore. Email <a href="mailto:info@parkspilgrim.org">info@parkspilgrim.org</a> to reserve a spot.</p>
     </div>
     <div class="offer-grid">
       <div class="offer">
@@ -519,7 +603,7 @@
         <p class="eyebrow">About the founder</p>
         <h2>Bobbie Kite</h2>
         <p class="role">Founder · PhD · MTS · Lifelong pilgrim</p>
-        <p class="prose" style="margin-left:0;">American Parks Pilgrimage grew out of one person's practice. Over 350 documented visits across all 63 national parks and 250 of the official 433 NPS sites, not as a checklist but as a way of paying attention.</p>
+        <p class="prose" style="margin-left:0;">American Parks Pilgrimage grew out of one person's practice. Over 350 documented visits across all 63 national parks and 250 of the official 433 NPS sites, as a way of paying attention.</p>
         <p class="prose" style="margin-left:0;">With a PhD and a Master of Theological Studies, Bobbie brings together the scholar's eye and the pilgrim's heart: rigorous about history and place, unhurried about meaning. The work now is sharing the practice: guiding others to approach the sites around them with the same intention.</p>
       </div>
     </div>
@@ -545,6 +629,30 @@
 </footer>
 
 <script>
+  // Mobile menu toggle
+  (function(){
+    var toggle = document.querySelector('.nav-toggle');
+    var links  = document.getElementById('nav-links');
+    if(!toggle || !links) return;
+    function setOpen(open){
+      links.classList.toggle('open', open);
+      toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+    }
+    toggle.addEventListener('click', function(){
+      setOpen(!links.classList.contains('open'));
+    });
+    // Close after tapping a link, or on Escape
+    links.querySelectorAll('a').forEach(function(a){
+      a.addEventListener('click', function(){ setOpen(false); });
+    });
+    document.addEventListener('keydown', function(e){
+      if(e.key === 'Escape' && links.classList.contains('open')){
+        setOpen(false); toggle.focus();
+      }
+    });
+  })();
+
   // Gentle scroll reveal
   (function(){
     var els = document.querySelectorAll('h2, .prose, .path, .type-strip, .offer, .about-stats, .stat');
