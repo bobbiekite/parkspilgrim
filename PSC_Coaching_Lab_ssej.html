@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSC Coaching Lab, Program Architecture</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,400&family=Source+Sans+3:wght@300;400;500;600;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --crimson: #8B0000;
+  --crimson-pale: #F5E8E8;
+  --gold: #C5A55A;
+  --gold-light: #E8D4A0;
+  --gold-dark: #A08040;
+  --navy: #1A2744;
+  --cream: #FAF7F2;
+  --parchment: #F0E8D8;
+  --charcoal: #2C2826;
+  --muted: #7A6E6A;
+  --border: #DDD0C0;
+  --green: #2D5A3D;
+  --green-pale: #E8F2EC;
+  --purple: #6B3A6B;
+  --teal: #2A5A8C;
+  --orange: #8B6D4A;
+  /* Category brand colors matching source */
+  --cat-admissions: #1A2744;
+  --cat-course:     #8B0000;
+  --cat-skills:     #B8860B;
+  --cat-journey:    #2D6B3F;
+  --cat-coaching:   #6B3A6B;
+  --cat-credential: #A08040;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Source Sans 3', sans-serif;
+  background: var(--cream);
+  color: var(--charcoal);
+  line-height: 1.5;
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 28px 72px;
+}
+
+/* ── MASTHEAD ── */
+.masthead {
+  text-align: center;
+  padding-bottom: 36px;
+  margin-bottom: 48px;
+  border-bottom: 3px solid var(--crimson);
+  position: relative;
+}
+.masthead::after {
+  content: '';
+  position: absolute;
+  bottom: -6px; left: 50%;
+  transform: translateX(-50%);
+  width: 120px; height: 3px;
+  background: var(--gold);
+}
+.inst-label {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 10px;
+}
+.masthead h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(28px, 4vw, 46px);
+  font-weight: 700; color: var(--crimson);
+  letter-spacing: 2px; margin-bottom: 6px;
+}
+.masthead .tagline {
+  font-family: 'Playfair Display', serif;
+  font-style: italic; font-size: 18px;
+  color: var(--muted); margin-bottom: 18px;
+}
+.stat-row { display: flex; justify-content: center; gap: 36px; flex-wrap: wrap; margin-top: 20px; }
+.stat { text-align: center; }
+.stat-num { font-family: 'Cinzel', serif; font-size: 32px; font-weight: 700; color: var(--crimson); line-height: 1; }
+.stat-label { font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-top: 4px; }
+
+/* ── SECTION HEADERS ── */
+.section-head { display: flex; align-items: center; gap: 14px; margin: 52px 0 20px; }
+.section-head h2 { font-family: 'Playfair Display', serif; font-size: 22px; font-weight: 700; color: var(--navy); white-space: nowrap; }
+.section-head .line { flex: 1; height: 1px; background: var(--border); }
+.section-num { width: 30px; height: 30px; border-radius: 50%; background: var(--crimson); color: white; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+/* ── PASSPORT GRID ── */
+.passport-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 12px;
+}
+@media (max-width: 700px) { .passport-grid { grid-template-columns: repeat(3, 1fr); } }
+
+.pp-cat {
+  padding: 20px 10px 16px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  background: white;
+  position: relative;
+}
+.pp-cat:last-child { border-right: none; }
+
+/* Color bars per category */
+.pp-cat::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 5px;
+}
+.pp-cat.cat-admissions::before { background: var(--cat-admissions); }
+.pp-cat.cat-course::before     { background: var(--cat-course); }
+.pp-cat.cat-skills::before     { background: var(--cat-skills); }
+.pp-cat.cat-journey::before    { background: var(--cat-journey); }
+.pp-cat.cat-coaching::before   { background: var(--gold); }
+.pp-cat.cat-credential::before { background: var(--cat-credential); }
+
+/* Highlighted coaching cat */
+.pp-cat.highlight { background: var(--navy); }
+.pp-cat.highlight .pp-code,
+.pp-cat.highlight .pp-name,
+.pp-cat.highlight .pp-sub { color: white !important; }
+
+.pp-icon { font-size: 22px; margin-bottom: 8px; display: block; margin-top: 6px; }
+.pp-code { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; line-height: 1; margin-bottom: 4px; }
+.pp-cat.cat-admissions .pp-code { color: var(--cat-admissions); }
+.pp-cat.cat-course .pp-code     { color: var(--cat-course); }
+.pp-cat.cat-skills .pp-code     { color: var(--cat-skills); }
+.pp-cat.cat-journey .pp-code    { color: var(--cat-journey); }
+.pp-cat.cat-credential .pp-code { color: var(--cat-credential); }
+
+.pp-name { font-size: 11px; font-weight: 700; color: var(--charcoal); margin-bottom: 4px; line-height: 1.2; }
+.pp-sub  { font-size: 10px; color: var(--muted); line-height: 1.3; }
+
+/* ── ASSESSMENT TABLE ── */
+.assessment-table { width: 100%; border-collapse: collapse; font-size: 14px; margin-bottom: 28px; }
+.assessment-table th { background: var(--navy); color: white; padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+.assessment-table th:first-child { border-radius: 8px 0 0 0; }
+.assessment-table th:last-child  { border-radius: 0 8px 0 0; }
+.assessment-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.assessment-table tr:last-child td { border-bottom: none; }
+.assessment-table tr:nth-child(even) td { background: var(--parchment); }
+
+.cat-badge {
+  display: inline-block;
+  font-size: 10px; font-weight: 700;
+  padding: 4px 8px; border-radius: 5px;
+  color: white; line-height: 1.3;
+  white-space: nowrap;
+}
+.cat-badge.admissions { background: var(--cat-admissions); }
+.cat-badge.course     { background: var(--cat-course); }
+.cat-badge.skills     { background: var(--cat-skills); }
+.cat-badge.journey    { background: var(--cat-journey); }
+.cat-badge.coaching   { background: var(--cat-coaching); }
+.cat-badge.credential { background: var(--cat-credential); }
+
+/* ── TRACKS ── */
+.tracks-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+@media (max-width: 640px) { .tracks-wrap { grid-template-columns: 1fr; } }
+
+.track-card { border-radius: 10px; overflow: hidden; border: 1px solid var(--border); box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
+.track-header { padding: 18px 22px; display: flex; align-items: center; gap: 14px; }
+.track-header.standard { background: var(--navy); }
+.track-header.fast     { background: var(--crimson); }
+.track-icon { font-size: 28px; }
+.track-title { font-family: 'Cinzel', serif; font-size: 18px; font-weight: 700; color: white; letter-spacing: 1px; }
+.track-sub { font-size: 12px; color: rgba(255,255,255,0.7); margin-top: 2px; }
+.track-body { padding: 20px 22px; background: white; }
+.ecp-pills { display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; }
+.ecp-pill { font-size: 12px; font-weight: 700; padding: 5px 14px; border-radius: 100px; border: 2px solid; }
+.ecp-pill.cr       { border-color: var(--green); color: var(--green); background: var(--green-pale); }
+.ecp-pill.ita      { border-color: var(--crimson); color: var(--crimson); background: var(--crimson-pale); }
+.ecp-pill.inactive { border-color: var(--border); color: var(--muted); background: #f5f5f5; text-decoration: line-through; opacity: 0.6; }
+.track-detail { font-size: 13px; color: var(--muted); line-height: 1.6; }
+.track-detail strong { color: var(--charcoal); }
+
+/* ── SESSION TIMELINE ── */
+.timeline-wrap {
+  background: var(--navy); border-radius: 12px;
+  padding: 28px 28px 32px; margin-bottom: 32px;
+  position: relative; overflow: hidden;
+}
+.timeline-wrap::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
+  background: linear-gradient(90deg, var(--gold), var(--crimson));
+}
+.timeline-title { font-family: 'Cinzel', serif; font-size: 16px; font-weight: 700; color: var(--gold); letter-spacing: 2px; text-transform: uppercase; text-align: center; margin-bottom: 28px; }
+.timeline-row { display: flex; align-items: flex-start; justify-content: space-between; gap: 4px; position: relative; }
+.timeline-row::before { content: ''; position: absolute; top: 20px; left: 6%; right: 6%; height: 2px; background: rgba(197,165,90,0.3); z-index: 0; }
+.tl-session { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; z-index: 1; }
+.tl-dot { width: 40px; height: 40px; border-radius: 50%; background: var(--crimson); border: 3px solid var(--gold); display: flex; align-items: center; justify-content: center; font-family: 'Cinzel', serif; font-size: 13px; font-weight: 700; color: white; margin-bottom: 10px; flex-shrink: 0; }
+.tl-dot.bookend { background: var(--gold); color: var(--navy); }
+.tl-week { font-size: 10px; font-weight: 700; letter-spacing: 1px; color: var(--gold); text-transform: uppercase; text-align: center; margin-bottom: 4px; }
+.tl-desc { font-size: 10px; color: rgba(255,255,255,0.6); text-align: center; line-height: 1.3; max-width: 80px; }
+
+/* ── MAJOR ALIGNMENT ── */
+.major-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 32px; }
+.major-card { background: white; border-radius: 8px; border: 1px solid var(--border); border-top: 4px solid var(--crimson); padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.major-abbr { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; color: var(--crimson); margin-bottom: 2px; }
+.major-name { font-size: 12px; font-weight: 700; color: var(--charcoal); margin-bottom: 8px; line-height: 1.3; }
+.major-cr { font-size: 11px; color: var(--muted); padding: 6px 0; border-top: 1px solid var(--border); line-height: 1.4; }
+.major-cr strong { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--green); margin-bottom: 2px; }
+.major-ita { font-size: 11px; color: var(--muted); padding: 6px 0 0; line-height: 1.4; }
+.major-ita strong { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--crimson); margin-bottom: 2px; }
+
+/* ── COST ── */
+.cost-wrap { display: grid; grid-template-columns: 1fr 2fr; gap: 24px; align-items: stretch; margin-bottom: 32px; }
+@media (max-width: 640px) { .cost-wrap { grid-template-columns: 1fr; } }
+.cost-card { background: var(--crimson); border-radius: 10px; padding: 28px 24px; text-align: center; color: white; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.cost-num { font-family: 'Cinzel', serif; font-size: 52px; font-weight: 700; color: var(--gold-light); line-height: 1; }
+.cost-label { font-size: 11px; letter-spacing: 2px; text-transform: uppercase; opacity: 0.8; margin-top: 6px; }
+.cost-detail { font-size: 13px; color: rgba(255,255,255,0.8); margin-top: 12px; line-height: 1.5; }
+.cost-breakdown { background: white; border-radius: 10px; border: 1px solid var(--border); padding: 24px; }
+.cost-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+.cost-row:last-child { border-bottom: none; }
+.cost-row .label { color: var(--muted); }
+.cost-row .val { font-weight: 700; color: var(--charcoal); }
+.cost-row .val.red { color: var(--crimson); }
+.cost-row .val.grn { color: var(--green); }
+
+/* ── 4D ── */
+.fourd-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 32px; }
+@media (max-width: 700px) { .fourd-grid { grid-template-columns: repeat(2, 1fr); } }
+.fourd-card { border-radius: 8px; padding: 18px 14px; border: 1px solid var(--border); background: white; position: relative; overflow: hidden; }
+.fourd-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; }
+.fourd-card.intellect::before { background: var(--teal); }
+.fourd-card.wellbeing::before { background: var(--green); }
+.fourd-card.character::before { background: var(--orange); }
+.fourd-card.purpose::before   { background: var(--purple); }
+.fourd-d { font-family: 'Cinzel', serif; font-size: 20px; font-weight: 700; margin-bottom: 1px; }
+.fourd-card.intellect .fourd-d { color: var(--teal); }
+.fourd-card.wellbeing .fourd-d { color: var(--green); }
+.fourd-card.character .fourd-d { color: var(--orange); }
+.fourd-card.purpose .fourd-d   { color: var(--purple); }
+.fourd-name { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+.fourd-body { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.fourd-stamps { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 8px; }
+.fourd-stamp { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 100px; background: var(--parchment); color: var(--charcoal); border: 1px solid var(--border); }
+
+/* ── PROOF BAR ── */
+.proof-bar { background: var(--navy); border-radius: 10px; padding: 24px 28px; display: flex; align-items: center; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+.proof-bar .quote-mark { font-family: 'Playfair Display', serif; font-size: 72px; color: var(--gold); line-height: 0.7; flex-shrink: 0; }
+.proof-quote { font-family: 'Playfair Display', serif; font-style: italic; font-size: 17px; color: white; line-height: 1.5; flex: 1; }
+.proof-quote strong { color: var(--gold-light); font-style: normal; }
+
+/* ── VERIFY ── */
+.verify-row { display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 48px; }
+.verify-pill { display: flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 100px; padding: 8px 16px; font-size: 13px; font-weight: 600; color: var(--charcoal); }
+.verify-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--crimson); flex-shrink: 0; }
+
+/* ── FOOTER ── */
+footer { text-align: center; padding-top: 20px; border-top: 1px solid var(--border); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+
+/* ── LAB CARDS (4 course grid) ── */
+.lab-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 32px; }
+@media (max-width: 900px) { .lab-grid { grid-template-columns: repeat(2, 1fr); } }
+.lab-card { background: white; border-radius: 8px; border: 1px solid var(--border); border-top: 4px solid var(--gold); padding: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); }
+.lab-card.ej { border-top-color: var(--green); }
+.lab-num { font-family: 'Cinzel', serif; font-size: 15px; font-weight: 700; color: var(--gold-dark); margin-bottom: 2px; }
+.lab-card.ej .lab-num { color: var(--green); }
+.lab-brand { font-size: 13px; font-weight: 700; color: var(--charcoal); margin-bottom: 6px; line-height: 1.3; }
+.lab-tag { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 2px 8px; border-radius: 100px; display: inline-block; margin-bottom: 8px; }
+.lab-tag.req { background: var(--crimson-pale); color: var(--crimson); }
+.lab-tag.opt { background: var(--parchment); color: var(--muted); }
+.lab-pairs { font-size: 11px; color: var(--muted); padding-top: 8px; border-top: 1px solid var(--border); line-height: 1.5; }
+.lab-pairs strong { display: block; font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--charcoal); margin-bottom: 2px; }
+
+/* ── OPPS TABLE ── */
+.opps-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 32px; }
+.opps-table th { background: var(--green); color: white; padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+.opps-table th:first-child { border-radius: 8px 0 0 0; }
+.opps-table th:last-child { border-radius: 0 8px 0 0; }
+.opps-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.opps-table tr:last-child td { border-bottom: none; }
+.opps-table tr:nth-child(even) td { background: var(--green-pale); }
+.opps-stage { font-family: 'Cinzel', serif; font-weight: 700; color: var(--green); font-size: 14px; }
+.opps-q { font-style: italic; color: var(--charcoal); }
+
+/* ── GUIDE MODEL CARDS ── */
+.guide-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 32px; }
+@media (max-width: 640px) { .guide-wrap { grid-template-columns: 1fr; } }
+.guide-card { border-radius: 10px; border: 1px solid var(--border); padding: 22px; background: white; box-shadow: 0 3px 12px rgba(0,0,0,0.06); }
+.guide-card h3 { font-family: 'Cinzel', serif; font-size: 15px; color: var(--green); margin-bottom: 10px; letter-spacing: 0.5px; }
+.guide-card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+/* ── SCIENCE LAB TABLE ── */
+.sci-table { width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 20px; }
+.sci-table th { background: var(--navy); color: white; padding: 11px 16px; text-align: left; font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; }
+.sci-table th:first-child { border-radius: 8px 0 0 0; }
+.sci-table th:last-child { border-radius: 0 8px 0 0; }
+.sci-table td { padding: 12px 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.sci-table tr:last-child td { border-bottom: none; }
+.sci-table tr:nth-child(even) td { background: var(--parchment); }
+.sci-label { font-weight: 700; color: var(--charcoal); }
+
+.name-tbd { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--crimson); background: var(--crimson-pale); padding: 2px 8px; border-radius: 100px; display: inline-block; margin-left: 6px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <!-- MASTHEAD -->
+  <header class="masthead">
+    <div class="inst-label">University of Denver &middot; College of Professional Studies</div>
+    <h1>PSC Coaching Lab</h1>
+    <div class="tagline">Where leaders are built, and where values are found, one lab at a time</div>
+    <div class="stat-row">
+      <div class="stat"><div class="stat-num">4</div><div class="stat-label">Lab Courses</div></div>
+      <div class="stat"><div class="stat-num">$1,200</div><div class="stat-label">Skills &amp; Service Lab</div></div>
+      <div class="stat"><div class="stat-num">$150</div><div class="stat-label">Educational Journey Lab</div></div>
+      <div class="stat"><div class="stat-num">$0</div><div class="stat-label">Pass Through Fees</div></div>
+    </div>
+  </header>
+
+  <!-- SECTION 1: PASSPORT CATEGORIES -->
+  <div class="section-head">
+    <div class="section-num">1</div>
+    <h2>The PSC Professional Passport</h2>
+    <div class="line"></div>
+  </div>
+
+  <p style="font-size:14px; color:var(--muted); margin-bottom:18px; line-height:1.6;">
+    The PSC Coaching Lab is one of six milestone stamp categories in the PSC Professional Passport, a student facing system that makes career readiness visible, verified, and portable. Every stamp is evidence of growth, not just participation.
+  </p>
+
+  <div class="passport-grid">
+    <div class="pp-cat cat-admissions">
+      <span class="pp-icon">🎫</span>
+      <div class="pp-code">A</div>
+      <div class="pp-name">Admissions</div>
+      <div class="pp-sub">Your journey begins before day one</div>
+    </div>
+    <div class="pp-cat cat-course">
+      <span class="pp-icon">📚</span>
+      <div class="pp-code">CC</div>
+      <div class="pp-name">Course Completion</div>
+      <div class="pp-sub">Building your credential, milestone by milestone</div>
+    </div>
+    <div class="pp-cat cat-skills">
+      <span class="pp-icon">🏆</span>
+      <div class="pp-code">S&amp;S</div>
+      <div class="pp-name">Skills &amp; Service</div>
+      <div class="pp-sub">Prove what you can do</div>
+    </div>
+    <div class="pp-cat cat-journey">
+      <span class="pp-icon">🗺️</span>
+      <div class="pp-code">EJ</div>
+      <div class="pp-name">Educational Journey</div>
+      <div class="pp-sub">Where purpose meets profession</div>
+    </div>
+    <div class="pp-cat cat-coaching highlight">
+      <span class="pp-icon">⭐</span>
+      <div class="pp-code">CL</div>
+      <div class="pp-name">PSC Coaching Lab</div>
+      <div class="pp-sub">Where leaders are built</div>
+    </div>
+    <div class="pp-cat cat-credential">
+      <span class="pp-icon">🎓</span>
+      <div class="pp-code">G</div>
+      <div class="pp-name">Graduation</div>
+      <div class="pp-sub">Footprints marking the path</div>
+    </div>
+  </div>
+  <p style="font-size:12px; color:var(--muted); margin-bottom:4px; font-style:italic;">&#9733; Highlighted category = PSC Coaching Lab</p>
+
+  <!-- SECTION 2: ASSESSMENT DELIVERABLES -->
+  <div class="section-head">
+    <div class="section-num">2</div>
+    <h2>Assessment Deliverables of the Process</h2>
+    <div class="line"></div>
+  </div>
+
+  <table class="assessment-table">
+    <thead>
+      <tr>
+        <th>Category</th>
+        <th>Milestones</th>
+        <th>Assessment Type</th>
+        <th>Possibilities &amp; Purpose</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><span class="cat-badge admissions">Admissions (A)</span></td>
+        <td><strong>Concurrent Enrollment, Associates Degree, Admitted to program</strong></td>
+        <td>Readiness Assessment</td>
+        <td>Baseline career readiness and self-awareness inventory at point of entry; sets benchmarks for growth measurement.</td>
+      </tr>
+      <tr>
+        <td><span class="cat-badge course">Course Completions (CC)</span></td>
+        <td><strong>Course Completions for core, major, and electives</strong></td>
+        <td>Assignment Assessments</td>
+        <td>Embedded assessments within aligned coursework (directed research, internship, applied projects); documents intellectual growth.</td>
+      </tr>
+      <tr>
+        <td><span class="cat-badge skills">Skills & Service (S&S)</span></td>
+        <td><strong>Riipen or industry project, DU Food Pantry</strong></td>
+        <td>Project &amp; Service Assessments</td>
+        <td>Riipen project rubrics, portfolio reviews, and public service reflections; demonstrates critical thinking, teamwork, ethical engagement.</td>
+      </tr>
+      <tr>
+        <td><span class="cat-badge journey">Educational Journey (EJ)</span></td>
+        <td><strong>Civic, Heritage, and Nature Educational Journeys</strong></td>
+        <td>4D Integration Assessment</td>
+        <td>Measures integration of all four dimensions through curriculum aligned journeys with a guide; provides framework for meaning making of content outside of the classroom.</td>
+      </tr>
+      <tr>
+        <td><span class="cat-badge coaching">PSC Coaching Lab (CL)</span></td>
+        <td><strong>Career Catalyst and Career Compass Coaching Labs</strong></td>
+        <td>Coaching Progress &amp; Growth</td>
+        <td>Pre/post self-awareness, communication, and career goal measures; aligns experiential experience with career readiness.</td>
+      </tr>
+      <tr>
+        <td><span class="cat-badge credential">Graduation (G)</span></td>
+        <td><strong>Certificate and/or Degree completion</strong></td>
+        <td>Culminating Portfolio Review</td>
+        <td>Full passport review, a graduation showcase evidencing skills, experiences, coaching growth. The passport IS the proof.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 3: SCIENCE LAB PARALLEL -->
+  <div class="section-head">
+    <div class="section-num">3</div>
+    <h2>Why It Looks Like a Science Lab</h2>
+    <div class="line"></div>
+  </div>
+
+  <p style="font-size:14px; color:var(--muted); margin-bottom:18px; line-height:1.6;">
+    Think of S&amp;S and EJ like Biology and Physics courses, and the Coaching Labs like the science lab sections that pair with them. Just like a science course without its lab is incomplete, an experiential course without its paired Coaching Lab misses the piece that makes the experience count as experiential. The lab is where the reflection, or the OPPS framework, gets applied, session by session, to whatever the student is actually going through.
+  </p>
+
+  <table class="sci-table">
+    <thead>
+      <tr>
+        <th>Course Sequence</th>
+        <th>S&amp;S, the &ldquo;Biology&rdquo; Track</th>
+        <th>EJ, the &ldquo;Physics&rdquo; Track</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="sci-label">Course 1, required</td>
+        <td>BACP 3500, Integrative Project</td>
+        <td>BACP 3400 or PPSS 2100</td>
+      </tr>
+      <tr>
+        <td class="sci-label">Paired lab</td>
+        <td>BACP 2000, Industry Project Coaching Lab (Career Compass)</td>
+        <td>BACP 2010 or BACP 2110, Educational Journey Lab I or II</td>
+      </tr>
+      <tr>
+        <td class="sci-label">Course 2, optional</td>
+        <td>BACP 3350 or LOS 3300, by major</td>
+        <td>The other of BACP 3400 or PPSS 2100</td>
+      </tr>
+      <tr>
+        <td class="sci-label">Paired lab</td>
+        <td>BACP 2100, Service Project Coaching Lab (Career Catalyst)</td>
+        <td>The other Educational Journey Lab</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <p style="font-size:13px; color:var(--muted); margin-bottom:32px; line-height:1.6; font-style:italic;">
+    Not a perfect parallel to an actual science lab, nobody is pipetting anything, but close enough that it clicks immediately for advisors, accreditation reviewers, and new team members. You already know what a lab is for. This is that, applied to values and meaning making instead of biology and physics.
+  </p>
+
+  <!-- SECTION 4: FOUR LAB COURSES -->
+  <div class="section-head">
+    <div class="section-num">4</div>
+    <h2>The Four Coaching Lab Courses</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="lab-grid">
+    <div class="lab-card">
+      <div class="lab-num">BACP 2000</div>
+      <div class="lab-brand">Industry Project Coaching Lab</div>
+      <span class="lab-tag req">S&amp;S Minimum, Required</span>
+      <div class="lab-pairs"><strong>Pairs With</strong>BACP 3500, Integrative Project<br><strong style="margin-top:6px;">Lab Name</strong>Career Compass</div>
+    </div>
+    <div class="lab-card">
+      <div class="lab-num">BACP 2100</div>
+      <div class="lab-brand">Service Project Coaching Lab</div>
+      <span class="lab-tag opt">S&amp;S Maximum, Optional</span>
+      <div class="lab-pairs"><strong>Pairs With</strong>BACP 3350 or LOS 3300, by major<br><strong style="margin-top:6px;">Lab Name</strong>Career Catalyst</div>
+    </div>
+    <div class="lab-card ej">
+      <div class="lab-num">BACP 2010</div>
+      <div class="lab-brand">Civic Educational Journey Lab</div>
+      <span class="lab-tag req">EJ Minimum, One of Two</span>
+      <div class="lab-pairs"><strong>Pairs With</strong>BACP 3400, Civic Engagement<br><strong style="margin-top:6px;">Lab Name</strong>Civic Journey</div>
+    </div>
+    <div class="lab-card ej">
+      <div class="lab-num">BACP 2110</div>
+      <div class="lab-brand">Nature Educational Journey Lab</div>
+      <span class="lab-tag req">EJ Minimum, One of Two</span>
+      <div class="lab-pairs"><strong>Pairs With</strong>PPSS 2100, Concepts of the Public Good<br><strong style="margin-top:6px;">Lab Name</strong>Nature Journey</div>
+    </div>
+  </div>
+
+  <p style="font-size:13px; color:var(--muted); margin-bottom:32px; line-height:1.6;">
+    Minimum EJ satisfaction requires one of BACP 2010 or BACP 2110. Students may complete both for the EJ maximum. The 2000-to-2010 and 2100-to-2110 numbering offset is intentional, mirroring the S&amp;S required-to-optional structure onto the EJ side.
+  </p>
+
+  <!-- SECTION 5: ECP TRACKS -->
+  <div class="section-head">
+    <div class="section-num">5</div>
+    <h2>Coaching Labs for Skills and Service and Educational Journeys, Two Tracks</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="tracks-wrap">
+    <div class="track-card">
+      <div class="track-header standard">
+        <div class="track-icon">🛤️</div>
+        <div>
+          <div class="track-title">Standard Track</div>
+          <div class="track-sub">One or Both Labs, Full Journey</div>
+        </div>
+      </div>
+      <div class="track-body">
+        <div class="ecp-pills">
+          <div class="ecp-pill cr">&#10003; Career Catalyst</div>
+          <div class="ecp-pill ita">&#10003; Career Compass</div>
+          <div class="ecp-pill" style="border-color: var(--teal); color: var(--teal); background: #E4EBF1;">&#10003; Civic Journey</div>
+          <div class="ecp-pill" style="border-color: var(--purple); color: var(--purple); background: #F1E7EF;">&#10003; Nature Journey</div>
+        </div>
+        <div class="track-detail">
+          Students receive <strong>both coaching labs</strong>, Career Catalyst about a year into their bachelor completion journey and Career Compass at the <strong>end</strong>.<br><br>
+          <strong>Career Catalyst</strong> aligns to the major specific course (see &sect;9 below).<br>
+          <strong>Career Compass</strong> always aligns to <em>BACP 3500, Integrative Project</em>.<br><br>
+          Total: <strong>12 coaching sessions, $2,400</strong>
+        </div>
+        <div class="track-detail" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);">
+          On the EJ side, students complete <strong>a minimum of one Educational Journey Lab</strong> (BACP 2010 Civic or BACP 2110 Nature, student choice), with the option to complete <strong>both for the EJ maximum</strong>.<br><br>
+          Total: <strong>1 to 2 EJ Labs, $150 to $300</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="track-card">
+      <div class="track-header fast">
+        <div class="track-icon">⚡</div>
+        <div>
+          <div class="track-title">Fast Track</div>
+          <div class="track-sub">Career Compass Only, Accelerated Completion</div>
+        </div>
+      </div>
+      <div class="track-body">
+        <div class="ecp-pills">
+          <div class="ecp-pill inactive">&#10007; Career Catalyst (not included)</div>
+          <div class="ecp-pill ita">&#10003; Career Compass</div>
+          <div class="ecp-pill" style="border-color: var(--teal); color: var(--teal); background: #E4EBF1;">&#10003; Civic Journey or Nature Journey, choose one</div>
+        </div>
+        <div class="track-detail">
+          Students receive only the <strong>Career Compass</strong> lab, aligned to the culminating course. Designed for accelerated pathways where students are with us for a shorter time.<br><br>
+          <strong>Career Compass</strong> always aligns to <em>BACP 3500, Integrative Project</em>.<br><br>
+          Total: <strong>6 coaching sessions, $1,200</strong>
+        </div>
+        <div class="track-detail" style="margin-top:14px; padding-top:14px; border-top:1px dashed var(--border);">
+          On the EJ side, students complete <strong>one Educational Journey Lab</strong>, student choice between BACP 2010 Civic or BACP 2110 Nature, based on site proximity and travel preference.<br><br>
+          Total: <strong>1 EJ Lab, $150</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: SESSION TIMELINES -->
+  <div class="section-head">
+    <div class="section-num">6</div>
+    <h2>Coaching Session Timelines, 10 Week Course Alignment</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="timeline-wrap">
+    <div class="timeline-title">Career Catalyst, <em>Find Your Edge</em>, 6 Sessions, Aligned to Course Arc</div>
+    <div class="timeline-row">
+      <div class="tl-session">
+        <div class="tl-dot bookend">S1</div>
+        <div class="tl-week">Pre Course</div>
+        <div class="tl-desc">Set the foundation, goals, strengths, and what is ahead</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S2</div>
+        <div class="tl-week">Week 1</div>
+        <div class="tl-desc">Map your landscape, industries, roles, and possibilities</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S3</div>
+        <div class="tl-week">Week 3</div>
+        <div class="tl-desc">Test your assumptions, reflections from the field</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S4</div>
+        <div class="tl-week">Week 8</div>
+        <div class="tl-desc">Name your edge, what sets you apart</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S5</div>
+        <div class="tl-week">Week 10</div>
+        <div class="tl-desc">Build your case, pulling it all together</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot bookend">S6</div>
+        <div class="tl-week">Post Course</div>
+        <div class="tl-desc">Own what is next, your path forward</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-wrap" style="margin-top: 28px;">
+    <div class="timeline-title">Career Compass, <em>Lead With Your Edge</em>, 6 Sessions, Aligned to Course Arc</div>
+    <div class="timeline-row">
+      <div class="tl-session">
+        <div class="tl-dot bookend">S1</div>
+        <div class="tl-week">Pre Course</div>
+        <div class="tl-desc">Get project ready, goals, expectations, and a game plan</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S2</div>
+        <div class="tl-week">Week 1</div>
+        <div class="tl-desc">Step into the work, navigating the first moves</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S3</div>
+        <div class="tl-week">Week 3</div>
+        <div class="tl-desc">Read the room, adjusting in real time</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S4</div>
+        <div class="tl-week">Week 8</div>
+        <div class="tl-desc">Connect the dots, experience meets identity</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot">S5</div>
+        <div class="tl-week">Week 10</div>
+        <div class="tl-desc">Deliver with confidence, finishing strong</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot bookend">S6</div>
+        <div class="tl-week">Post Course</div>
+        <div class="tl-desc">Carry it forward, your edge in action</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="timeline-wrap" style="margin-top: 28px; background: var(--green);">
+    <div class="timeline-title" style="color: var(--gold-light);">Civic Educational Journey Lab (BACP 2010), 2 Sessions, Aligned to BACP 3400</div>
+    <div class="timeline-row">
+      <div class="tl-session">
+        <div class="tl-dot bookend" style="background: var(--gold); color: var(--green);">S1</div>
+        <div class="tl-week">Week 1</div>
+        <div class="tl-desc">Orient and Plan with the guide, naming intention around citizenship, community, and civic identity</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot bookend" style="background: var(--gold); color: var(--green);">S2</div>
+        <div class="tl-week">Week 9</div>
+        <div class="tl-desc">Share with the guide, processing what bearing witness surfaced about the student's own values</div>
+      </div>
+    </div>
+    <p style="text-align:center; font-size:11px; color:rgba(255,255,255,0.7); margin-top:18px; max-width:620px; margin-left:auto; margin-right:auto; line-height:1.5;">
+      Participate happens independently between sessions. Student chooses an NPS civic or heritage site, in person or virtual, based on proximity and travel preference. Example: a site in the model of Amache National Historic Site.
+    </p>
+  </div>
+
+  <div class="timeline-wrap" style="margin-top: 28px; background: var(--green);">
+    <div class="timeline-title" style="color: var(--gold-light);">Nature Educational Journey Lab (BACP 2110), 2 Sessions, Aligned to PPSS 2100</div>
+    <div class="timeline-row">
+      <div class="tl-session">
+        <div class="tl-dot bookend" style="background: var(--gold); color: var(--green);">S1</div>
+        <div class="tl-week">Week 1</div>
+        <div class="tl-desc">Orient and Plan with the guide, naming intention around the natural world and the public good</div>
+      </div>
+      <div class="tl-session">
+        <div class="tl-dot bookend" style="background: var(--gold); color: var(--green);">S2</div>
+        <div class="tl-week">Week 9</div>
+        <div class="tl-desc">Share with the guide, processing what the encounter with the land surfaced about the student's own values</div>
+      </div>
+    </div>
+    <p style="text-align:center; font-size:11px; color:rgba(255,255,255,0.7); margin-top:18px; max-width:620px; margin-left:auto; margin-right:auto; line-height:1.5;">
+      Participate happens independently between sessions. Student chooses an NPS nature site, in person or virtual, based on proximity and travel preference. Example: a site in the model of Florissant Fossil Beds National Monument.
+    </p>
+  </div>
+
+  <!-- SECTION 7: OPPS FRAMEWORK -->
+  <div class="section-head">
+    <div class="section-num">7</div>
+    <h2>The OPPS Framework for Educational Journeys</h2>
+    <div class="line"></div>
+  </div>
+
+  <p style="font-size:14px; color:var(--muted); margin-bottom:18px; line-height:1.6;">
+    Developed and field tested across 300+ NPS sites. This is the operating system underneath the Educational Journey side of the Passport, and it is where values actually get named, tested, and shaped.
+  </p>
+
+  <table class="opps-table">
+    <thead>
+      <tr>
+        <th>Stage</th>
+        <th>Core Question</th>
+        <th>What Happens Here</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="opps-stage">Orient</td>
+        <td class="opps-q">Why am I going, and what am I hoping to find?</td>
+        <td>Naming an intention before arrival, shifting from "where to go" to "why go." Research the site's nature, heritage, and civic layers so you arrive aware of all three.</td>
+      </tr>
+      <tr>
+        <td class="opps-stage">Plan</td>
+        <td class="opps-q">How much time do I need, and does this plan still feel right?</td>
+        <td>Vetting the itinerary, whether alone or with others, and checking your overall feeling about the plan. Finalizing by making reservations.</td>
+      </tr>
+      <tr>
+        <td class="opps-stage">Participate</td>
+        <td class="opps-q">What is this place asking of me, right now?</td>
+        <td>Being fully present at the site, hiking, reflecting, engaging staff, allowing for the unplanned (weather, fear, a chance encounter) to become part of the meaning.</td>
+      </tr>
+      <tr>
+        <td class="opps-stage">Share</td>
+        <td class="opps-q">What changed, and who else needs to hear it?</td>
+        <td>Returning home and metabolizing the experience, journaling, storytelling, follow up action, so the experience continues to shape life after the visit.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- SECTION 8: GUIDE RELATIONSHIPS -->
+  <div class="section-head">
+    <div class="section-num">8</div>
+    <h2>Credit and Non Credit Options, Two Kinds of Delivery</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="guide-wrap">
+    <div class="guide-card">
+      <h3>PSC Degree Students</h3>
+      <p>The educational guide is present for Orient and Plan (Session 1, aligned to the start of the paired course) and for Share (Session 2, near the end). The actual Participate phase, the pilgrimage itself, happens independently. Students choose an NPS site based on what is near them, what they are willing and able to travel to, and whether an in person or virtual experience fits their life. The guide is not designed to be there for that part. The student walks it alone, then brings what happened back to the guide to process.</p>
+    </div>
+    <div class="guide-card">
+      <h3>OLLI &amp; PWD Members</h3>
+      <p>Like the Florissant Fossil Beds and Amache Educational Journeys, an educational guide (chaplain) is there for all four phases, together, as a group. There is no independent Participate phase. The group orients together virtually, then plans, participates, and shares together across a single full experience. A fundamentally different delivery model for a different audience, people who want the whole experience held for them, not people building a credential who need flexibility to complete a requirement around a job and a life.</p>
+    </div>
+  </div>
+
+  <p style="font-size:13px; color:var(--muted); margin-bottom:32px; line-height:1.6; font-style:italic;">
+    Both are legitimate applications of OPPS as Educational Journeys. A PSC student who wants the fully guided version can join an OLLI EJ or participate through the Professional Workforce Development non credit offering of an EJ instead of the independent Participate model.
+  </p>
+
+  <!-- SECTION 9: MAJOR ALIGNMENT -->
+  <div class="section-head">
+    <div class="section-num">9</div>
+    <h2>Coaching Lab Course Alignment by Major</h2>
+    <div class="line"></div>
+  </div>
+
+  <p style="font-size:14px; color:var(--muted); margin-bottom:8px; line-height:1.6;">
+    The <strong>Career Catalyst</strong> lab aligns to a major specific course. The <strong>Career Compass</strong> lab always aligns to <strong>BACP 3500, Integrative Project</strong> across all majors. The EJ Labs are not major specific, every student chooses between the same two courses, <strong>BACP 3400</strong> or <strong>PPSS 2100</strong>, regardless of major.
+  </p>
+
+  <p style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold-dark); margin-bottom:12px;">Skills and Service Alignment, By Major</p>
+
+  <div class="major-grid">
+    <div class="major-card">
+      <div class="major-abbr">CA</div>
+      <div class="major-name">Communication Arts</div>
+      <div class="major-cr"><strong>Career Catalyst Aligns To</strong>BACP 3350, Directed Research</div>
+      <div class="major-ita"><strong>Career Compass Aligns To</strong>BACP 3500, Integrative Project</div>
+    </div>
+    <div class="major-card">
+      <div class="major-abbr">HCA</div>
+      <div class="major-name">Healthcare Administration</div>
+      <div class="major-cr"><strong>Career Catalyst Aligns To</strong>LOS 3300, Project Management</div>
+      <div class="major-ita"><strong>Career Compass Aligns To</strong>BACP 3500, Integrative Project</div>
+    </div>
+    <div class="major-card">
+      <div class="major-abbr">IT</div>
+      <div class="major-name">Information Technology</div>
+      <div class="major-cr"><strong>Career Catalyst Aligns To</strong>LOS 3300, Project Management</div>
+      <div class="major-ita"><strong>Career Compass Aligns To</strong>BACP 3500, Integrative Project</div>
+    </div>
+    <div class="major-card">
+      <div class="major-abbr">ORL</div>
+      <div class="major-name">Organizational Leadership</div>
+      <div class="major-cr"><strong>Career Catalyst Aligns To</strong>BACP 3350, Directed Research</div>
+      <div class="major-ita"><strong>Career Compass Aligns To</strong>BACP 3500, Integrative Project</div>
+    </div>
+    <div class="major-card">
+      <div class="major-abbr">TSC</div>
+      <div class="major-name">Transportation &amp; Supply Chain</div>
+      <div class="major-cr"><strong>Career Catalyst Aligns To</strong>LOS 3300, Project Management</div>
+      <div class="major-ita"><strong>Career Compass Aligns To</strong>BACP 3500, Integrative Project</div>
+    </div>
+  </div>
+
+  <p style="font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:12px;">Educational Journey Alignment, All Majors</p>
+
+  <div class="major-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 32px;">
+    <div class="major-card" style="border-top-color: var(--green);">
+      <div class="major-abbr" style="color: var(--green);">ALL</div>
+      <div class="major-name">Every Major, Civic Path</div>
+      <div class="major-cr"><strong style="color:var(--green);">EJ Lab Aligns To</strong>BACP 2010, paired with BACP 3400, Civic Engagement</div>
+    </div>
+    <div class="major-card" style="border-top-color: var(--green);">
+      <div class="major-abbr" style="color: var(--green);">ALL</div>
+      <div class="major-name">Every Major, Nature Path</div>
+      <div class="major-cr"><strong style="color:var(--green);">EJ Lab Aligns To</strong>BACP 2110, paired with PPSS 2100, Concepts of the Public Good</div>
+    </div>
+  </div>
+
+  <!-- SECTION 10: COST STRUCTURE -->
+  <div class="section-head">
+    <div class="section-num">10</div>
+    <h2>Cost Structure</h2>
+    <div class="line"></div>
+  </div>
+
+  <div class="cost-wrap">
+    <div class="cost-card">
+      <div class="cost-num">$1,200</div>
+      <div class="cost-label">Per Coaching Lab (S&amp;S)</div>
+      <div class="cost-detail">6 sessions, direct pay to coaches, no intermediary fees</div>
+    </div>
+    <div class="cost-breakdown">
+      <div class="cost-row"><span class="label">Sessions per S&amp;S lab</span><span class="val">6 sessions</span></div>
+      <div class="cost-row"><span class="label">Coach pay per session</span><span class="val red">$200 / session</span></div>
+      <div class="cost-row"><span class="label">Pass through fees</span><span class="val grn">$0, none</span></div>
+      <div class="cost-row"><span class="label">Credit attached</span><span class="val">0 Credit Lab (aligned to specific course per major)</span></div>
+      <div class="cost-row"><span class="label">Standard Track, both S&amp;S labs</span><span class="val red">$2,400, 12 sessions</span></div>
+      <div class="cost-row"><span class="label">Fast Track, Career Compass only</span><span class="val red">$1,200, 6 sessions</span></div>
+    </div>
+  </div>
+
+  <div class="cost-wrap" style="margin-top: 20px;">
+    <div class="cost-card" style="background: var(--green);">
+      <div class="cost-num" style="color: var(--gold-light);">$150</div>
+      <div class="cost-label">Per Educational Journey Lab (EJ)</div>
+      <div class="cost-detail">2 sessions, direct pay to educational guides, no intermediary fees</div>
+    </div>
+    <div class="cost-breakdown">
+      <div class="cost-row"><span class="label">Sessions per EJ Lab</span><span class="val">2 sessions</span></div>
+      <div class="cost-row"><span class="label">Guide pay per session</span><span class="val red">$75 / session</span></div>
+      <div class="cost-row"><span class="label">Pass through fees</span><span class="val grn">$0, none</span></div>
+      <div class="cost-row"><span class="label">Credit attached</span><span class="val">0 Credit Lab (aligned to BACP 3400 or PPSS 2100)</span></div>
+      <div class="cost-row"><span class="label">Standard Track, one or both EJ Labs</span><span class="val red">$150 to $300</span></div>
+      <div class="cost-row"><span class="label">Fast Track, one EJ Lab</span><span class="val red">$150</span></div>
+    </div>
+  </div>
+
+  <!-- SECTION 11: 4D INTEGRATION -->
+  <div class="section-head">
+    <div class="section-num">11</div>
+    <h2>4D Experience Integration</h2>
+    <div class="line"></div>
+  </div>
+
+  <p style="font-size:14px; color:var(--muted); margin-bottom:18px; line-height:1.6;">
+    The PSC Professional Passport does not sit <em>alongside</em> the 4D Experience, it <em>enacts</em> it. Each stamp category maps directly to one or more of DU&rsquo;s four dimensions.
+  </p>
+
+  <div class="fourd-grid">
+    <div class="fourd-card intellect">
+      <div class="fourd-d">Deepen</div>
+      <div class="fourd-name">Intellect</div>
+      <div class="fourd-body">Credential milestones document sustained intellectual engagement, not just seat time.</div>
+      <div class="fourd-stamps">
+        <div class="fourd-stamp">Course Completion</div>
+        <div class="fourd-stamp">Graduation</div>
+      </div>
+    </div>
+    <div class="fourd-card wellbeing">
+      <div class="fourd-d">Develop</div>
+      <div class="fourd-name">Well-Being</div>
+      <div class="fourd-body">PSC Coaching Lab and Educational Journey foster belonging, self-awareness, and resilience.</div>
+      <div class="fourd-stamps">
+        <div class="fourd-stamp">Admissions</div>
+        <div class="fourd-stamp">Educational Journey</div>
+        <div class="fourd-stamp">PSC Coaching Lab</div>
+      </div>
+    </div>
+    <div class="fourd-card character">
+      <div class="fourd-d">Discover</div>
+      <div class="fourd-name">Character</div>
+      <div class="fourd-body">Service, experiential learning, coaching, and reflection embed ethical engagement and responsibility.</div>
+      <div class="fourd-stamps">
+        <div class="fourd-stamp">Skills &amp; Service</div>
+        <div class="fourd-stamp">Educational Journey</div>
+        <div class="fourd-stamp">PSC Coaching Lab</div>
+      </div>
+    </div>
+    <div class="fourd-card purpose">
+      <div class="fourd-d">Design</div>
+      <div class="fourd-name">Purpose</div>
+      <div class="fourd-body">Each stamp is not just participation but evidence, making growth visible, assessable, and portable.</div>
+      <div class="fourd-stamps">
+        <div class="fourd-stamp">Educational Journey</div>
+        <div class="fourd-stamp">PSC Coaching Lab</div>
+        <div class="fourd-stamp">Graduation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROOF BAR -->
+  <div class="proof-bar">
+    <div class="quote-mark">&ldquo;</div>
+    <div class="proof-quote">
+      The Passport Is the Proof. Every stamp verified through <strong>Canvas, Digication &amp; Crimson Constellation</strong>. Graduates carry a physical passport and shareable digital portfolio that answers two questions at once: <strong>&ldquo;How do I know I am ready?&rdquo;</strong> for the student, and <strong>&ldquo;How do I know this candidate is ready?&rdquo;</strong> for the employer.
+    </div>
+  </div>
+
+  <div class="verify-row">
+    <div class="verify-pill"><div class="verify-dot"></div>Canvas, Activity &amp; Assessment Tracking</div>
+    <div class="verify-pill"><div class="verify-dot"></div>Digication, Portfolio Documentation</div>
+    <div class="verify-pill"><div class="verify-dot"></div>Crimson Constellation, Stamp Verification</div>
+    <div class="verify-pill"><div class="verify-dot"></div>Physical Passport, Tangible Credential</div>
+    <div class="verify-pill"><div class="verify-dot"></div>Shareable Digital Portfolio</div>
+  </div>
+
+  <footer>
+    PSC Coaching Lab &middot; PSC Professional Passport &middot; University of Denver &middot; College of Professional Studies
+    <br><span style="font-size:9px; letter-spacing:1px; margin-top:6px; display:inline-block;">&copy; 2026 University of Denver, College of Professional Studies. All rights reserved.</span>
+  </footer>
+
+</div>
+</body>
+</html>
